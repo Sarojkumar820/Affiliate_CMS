@@ -31,7 +31,7 @@ const DatePickerInput = ({ label, name, placeholder = "mm/dd/yyyy" }: any) => {
 
   return (
     <div className="mb-1 sm:mb-4">
-      <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+      <label className="mb-2.5 block font-medium text-black dark:text-white">
         {label}
       </label>
       <div className="relative">
