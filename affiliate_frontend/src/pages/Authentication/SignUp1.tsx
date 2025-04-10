@@ -70,26 +70,38 @@ const validationSchema = Yup.object().shape({
 
 export default function SignUp1() {
   const handleRegister = async (val: any) => {
-    const payload = {
-      full_name: val.full_name,
-      phone: val.phone,
-      email: val.email,
-      gender: val.gender,
-      gst_number: val.gst_number,
-      aadhaar_number: val.aadhaar_number,
-      user_type: val.user_type,
-      dob_or_incorporation: val.dob,
-      pan_number: val.pan_number,
-      address_line: val.address,
-      state: val.state,
-      city: val.city,
-      pincode: val.pin_code,
-      profilePic: val.profilePic,
-      panCard: val.panCard,
-      aadhaarCard: val.aadhaarCard,
-    };
+    const formData = new FormData();
+
+    formData.append('full_name', val.full_name);
+    formData.append('phone', val.phone);
+    formData.append('email', val.email);
+    formData.append('gender', val.gender);
+    formData.append('gst_number', val.gst_number);
+    formData.append('aadhaar_number', val.aadhaar_number);
+    formData.append('user_type', val.user_type);
+    formData.append('dob_or_incorporation', val.dob);
+    formData.append('pan_number', val.pan_number);
+    formData.append('address_line', val.address);
+    formData.append('state', val.state);
+    formData.append('city', val.city);
+    formData.append('pincode', val.pin_code);
+  
+    // Append files (check if they exist)
+    if (val.profilePic) {
+      formData.append('profilePic', val.profilePic);
+    }
+    if (val.panCard) {
+      formData.append('panCard', val.panCard);
+    }
+    if (val.aadhaarCard) {
+      formData.append('aadhaarCard', val.aadhaarCard);
+    }
     try {
-      const responseData = await axios.post(`${siteConfig.REGISTER}`, payload);
+      const responseData = await axios.post(`${siteConfig.REGISTER}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       console.log('Response: ', responseData);
     } catch (error) {
       console.log('Error:', error);
