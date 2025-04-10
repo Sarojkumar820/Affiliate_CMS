@@ -24,10 +24,10 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         // Disable SSL verification for HTTP client in local environment only
-        if ($this->app->environment('local')) {
-            Http::withOptions([
-                'verify' => false
-            ]);
-        }
+        // if ($this->app->environment('local')) {
+        //     Http::withOptions([
+        //         'verify' => false
+        //     ]);
+        // }
     }
 }

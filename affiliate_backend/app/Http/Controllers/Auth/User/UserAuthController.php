@@ -17,57 +17,43 @@ class UserAuthController extends Controller
     public function sendOtp(Request $request)
     {
         try {
-            // Validate the request
-            $validated = $request->validate([
-                'phone' => 'required|numeric|digits:10'
+            $request->validate([
+                'phone' => 'required|numeric|digits:10',
             ]);
-            $phone = $validated['phone'];
 
-            // Check if user exists, if not create new user
-            $user = User::where('phone', $phone)->first();
+            $phone = $request->phone;
 
-            if (!$user) {
-                $user = User::create([
-                    'phone' => $phone,
-                ]);
+            // Create or find user
+            $user = User::firstOrCreate(['phone' => $phone]);
 
-                if (!$user) {
-                    throw new \Exception('Failed to create new user');
-                }
-            }
-            // Generate 6-digit OTP
+            // Generate OTP
             $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $otpExpiresAt = now()->addMinutes(5); // Changed to 10 minutes
+            $otpExpiresAt = now()->addMinutes(5);
 
-            // Store OTP in the database
             $user->update([
                 'otp' => $otp,
                 'otp_expires_at' => $otpExpiresAt,
-                'is_verified' => false
+                'is_verified' => false,
             ]);
 
-            if (!$user->save()) {
-                throw new \Exception('Failed to update user OTP');
-            }
-
-            // Send OTP via SMS
+            // Message
             $message = "$otp is your Antworks Account verification code - ANTWORKS";
-            $encodedMessage = rawurlencode($message);
 
-            $response = Http::withOptions([
-                'verify' => false // Disable SSL verification (for development only)
-            ])->asForm()->post('https://api.textlocal.in/send/', [
-                'username' => env('SMS_GATEWAY_USERNAME'),
-                'hash' => env('SMS_GATEWAY_HASH_API'),
-                'numbers' => $phone,
-                'sender' => env('SMS_GATEWAY_SENDER'),
-                'message' => $encodedMessage,
+            // Send via SMS gateway
+            $response = Http::asForm()->withOptions([
+                // 'verify' => false,
+            ])->post(config('services.sms_gateway.url'), [
+                'username' => config('services.sms_gateway.username'),
+                'hash'     => config('services.sms_gateway.hash'),
+                'numbers'  => $phone,
+                'sender'   => config('services.sms_gateway.sender'),
+                'message'  => rawurlencode($message),
             ]);
 
             if (!$response->successful()) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'OTP generated but failed to send SMS'
+                    'message' => 'OTP generated but failed to send SMS',
                 ], 500);
             }
 
@@ -75,17 +61,16 @@ class UserAuthController extends Controller
                 'status' => true,
                 'message' => 'OTP sent successfully',
                 'data' => [
-                    'phone' => substr($phone, 0, 3) . 'XXXXX' . substr($phone, -2) // Masked phone
+                    'phone' => substr($phone, 0, 3) . 'XXXXX' . substr($phone, -2),
                 ]
-            ], 200);
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'An error occurred while processing your request',
+                'message' => 'Something went wrong',
             ], 500);
         }
     }
-
     // Verify OTP and Handle Registration/Login
     public function verifyOtp(Request $request)
     {
@@ -187,7 +172,7 @@ class UserAuthController extends Controller
                 'pincode' => 'nullable|string|digits:6',
             ]);
 
-            $password = $this->generateStrongPassword(16);// 16-character strong password
+            $password = $this->generateStrongPassword(16); // 16-character strong password
             $user->password = Hash::make($password);
 
             // Step 4: Fill user fields

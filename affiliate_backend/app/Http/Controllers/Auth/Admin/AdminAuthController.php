@@ -16,67 +16,60 @@ class AdminAuthController extends Controller
 {
     public function sendOtp(Request $request)
     {
-        // Validate the request
-        $validated = $request->validate([
-            'phone' => 'required|numeric|digits:10'
-        ]);
-        $phone = $validated['phone'];
-
-        // Check if admin exists
-        $admin = Admin::where('phone', $phone)->first();
-
-        if (!$admin) {
-            return response()->json([
-                'status' => false,
-                'message' => "You don't have an admin account. Please contact your Administrator."
-            ], 404);
-        }
-
-        // Generate OTP
-        $otp = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-        $otpExpiresAt = now()->addMinutes(5); // Changed to 10 minutes
-
-        // Store OTP in the database
         try {
+            $request->validate([
+                'phone' => 'required|numeric|digits:10',
+            ]);
+
+            $phone = $request->phone;
+
+            // Create or find user
+            $admin = Admin::firstOrCreate(['phone' => $phone]);
+
+            // Generate OTP
+            $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $otpExpiresAt = now()->addMinutes(5);
+
             $admin->update([
                 'otp' => $otp,
+                'otp_expires_at' => $otpExpiresAt,
                 'is_verified' => false,
-                'otp_expires_at' => $otpExpiresAt
             ]);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Failed to store OTP'], 500);
-        }
 
-        // Send OTP via SMS
-        try {
+            // Message
             $message = "$otp is your Antworks Account verification code - ANTWORKS";
-            $encodedMessage = rawurlencode($message);
 
-            $response = Http::withOptions([
-                'verify' => false // Disable SSL verification (for development only)
-            ])->asForm()->post('https://api.textlocal.in/send/', [
-                'username' => env('SMS_GATEWAY_USERNAME'),
-                'hash' => env('SMS_GATEWAY_HASH_API'),
-                'numbers' => $phone,
-                'sender' => env('SMS_GATEWAY_SENDER'),
-                'message' => $encodedMessage,
+            // Send via SMS gateway
+            $response = Http::asForm()->withOptions([
+                // 'verify' => false,
+            ])->post(config('services.sms_gateway.url'), [
+                'username' => config('services.sms_gateway.username'),
+                'hash'     => config('services.sms_gateway.hash'),
+                'numbers'  => $phone,
+                'sender'   => config('services.sms_gateway.sender'),
+                'message'  => rawurlencode($message),
             ]);
 
             if (!$response->successful()) {
-                return response()->json(['status' => false, 'message' => 'Failed to send OTP. Please try again.'], 500);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'OTP generated but failed to send SMS',
+                ], 500);
             }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP sent successfully',
+                'phone' => substr($phone, 0, 3) . 'XXXXX' . substr($phone, -2),
+
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'OTP sending failed. Please try again later.'], 500);
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+            ], 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'OTP sent successfully',
-            'phone' => substr($phone, 0, 3) . 'XXXXX' . substr($phone, -2) // Masked phone
-
-        ], 200);
     }
-
     public function verifyOtp(Request $request)
     {
         $request->validate([
