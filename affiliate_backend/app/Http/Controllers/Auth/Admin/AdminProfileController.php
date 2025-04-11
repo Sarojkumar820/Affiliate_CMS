@@ -154,7 +154,7 @@ class AdminProfileController extends Controller
 
     public function changePassword(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var \App\Models\Admin $admin */
         $admin = Auth::guard('admin')->user();
 
         if (!$admin) {
