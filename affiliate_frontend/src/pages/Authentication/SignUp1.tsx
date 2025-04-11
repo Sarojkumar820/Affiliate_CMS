@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import siteConfig from '../../util/siteConfig';
 import AntWorksLogo from '../../Assets/AntWorksLogo/ant-works-logo.png';
+import { State, City } from 'country-state-city';
 
 const initialValues = {
   full_name: '',
@@ -44,6 +45,8 @@ const fileValidation = Yup.mixed()
   .test('fileFormat', 'Unsupported Format', (value: any) =>
     value ? SUPPORTED_FORMATS.includes(value.type) : true,
   );
+
+const allStates = State.getStatesOfCountry('IN').map((state) => state.name);
 
 const validationSchema = Yup.object().shape({
   full_name: Yup.string().required('Full name is required'),
@@ -141,120 +144,129 @@ export default function SignUp1() {
                 console.log('Submitted data:', values);
               }}
             >
-              <Form>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <TextInput
-                    label="Name"
-                    name="full_name"
-                    placeholder="Enter your full name"
-                  />
-                  <TextInput
-                    label="Email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                  />
-                </div>
+              {({ values, setFieldValue }) => {
+                const selectedState = State.getStatesOfCountry('IN').find(
+                  (item) => item.name === values.state,
+                );
+                const stateIsoCode = selectedState?.isoCode || '';
+                const cities = City.getCitiesOfState(
+                  'IN',
+                  stateIsoCode || '',
+                ).map((city) => city.name);
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <TextInput
-                    label="Phone"
-                    name="phone"
-                    placeholder="Enter your phone number"
-                  />
-                  <SelectInput
-                    label="Gender"
-                    name="gender"
-                    options={['Male', 'Female']}
-                  />
-                </div>
+                return (
+                  <Form>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <TextInput
+                        label="Name"
+                        name="full_name"
+                        placeholder="Enter your full name"
+                      />
+                      <TextInput
+                        label="Email"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <DatePickerInput name="dob" label="Date of Birth" />
-                  <SelectInput
-                    label="User Type"
-                    name="user_type"
-                    options={['Buddy', 'Bizbuddy']}
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <TextInput
+                        label="Phone"
+                        name="phone"
+                        placeholder="Enter your phone number"
+                      />
+                      <SelectInput
+                        label="Gender"
+                        name="gender"
+                        options={['Male', 'Female']}
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <TextInput
-                    label="Pan Number"
-                    name="pan_number"
-                    placeholder="Enter your pan number"
-                  />
-                  <TextInput
-                    label="GST Number"
-                    name="gst_number"
-                    placeholder="Enter your gst number"
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <DatePickerInput name="dob" label="Date of Birth" />
+                      <SelectInput
+                        label="User Type"
+                        name="user_type"
+                        options={['Buddy', 'Bizbuddy']}
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <TextInput
-                    label="Aadhaar Number"
-                    name="aadhaar_number"
-                    placeholder="Enter your aadhaar number"
-                  />
-                  <TextInput
-                    label="Address"
-                    name="address"
-                    placeholder="Enter your address"
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <TextInput
+                        label="Pan Number"
+                        name="pan_number"
+                        placeholder="Enter your pan number"
+                      />
+                      <TextInput
+                        label="GST Number"
+                        name="gst_number"
+                        placeholder="Enter your gst number"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <SelectInput
-                    label="State"
-                    name="state"
-                    options={['UP', 'HARYANA']}
-                  />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <TextInput
+                        label="Aadhaar Number"
+                        name="aadhaar_number"
+                        placeholder="Enter your aadhaar number"
+                      />
+                      <TextInput
+                        label="Address"
+                        name="address"
+                        placeholder="Enter your address"
+                      />
+                    </div>
 
-                  <SelectInput
-                    label="City"
-                    name="city"
-                    options={['Gorakhpur', 'Gurugram']}
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <SelectInput
+                        label="State"
+                        name="state"
+                        options={allStates}
+                      />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <TextInput
-                    label="Pin Code"
-                    name="pin_code"
-                    placeholder="Enter your pin code"
-                  />
-                  <FileUploadInput
-                    name="profilePic"
-                    label="Upload Profile Picture"
-                  />
-                </div>
+                      <SelectInput label="City" name="city" options={cities} />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
-                  <FileUploadInput name="panCard" label="Upload Pan Card" />
-                  <FileUploadInput
-                    name="aadhaarCard"
-                    label="Upload Aadhaar Card"
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <TextInput
+                        label="Pin Code"
+                        name="pin_code"
+                        placeholder="Enter your pin code"
+                      />
+                      <FileUploadInput
+                        name="profilePic"
+                        label="Upload Profile Picture"
+                      />
+                    </div>
 
-                <div className="mb-5">
-                  <input
-                    type="submit"
-                    value="Create account"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                  />
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                      <FileUploadInput name="panCard" label="Upload Pan Card" />
+                      <FileUploadInput
+                        name="aadhaarCard"
+                        label="Upload Aadhaar Card"
+                      />
+                    </div>
 
-                <div className="mt-6 text-center">
-                  <p>
-                    Already have an account?{' '}
-                    <Link to="/auth/signin" className="text-primary">
-                      Sign in
-                    </Link>
-                  </p>
-                </div>
-              </Form>
+                    <div className="mb-5">
+                      <input
+                        type="submit"
+                        value="Create account"
+                        className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                      />
+                    </div>
+
+                    <div className="mt-6 text-center">
+                      <p>
+                        Already have an account?{' '}
+                        <Link to="/auth/signin" className="text-primary">
+                          Sign in
+                        </Link>
+                      </p>
+                    </div>
+                  </Form>
+                );
+              }}
             </Formik>
           </div>
         </div>
