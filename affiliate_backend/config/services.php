@@ -36,10 +36,10 @@ return [
     ],
 
     'sms_gateway' => [
-    'url' => env('SMS_GATEWAY_URL'),
-    'username' => env('SMS_GATEWAY_USERNAME'),
-    'hash' => env('SMS_GATEWAY_HASH_API'),
-    'sender' => env('SMS_GATEWAY_SENDER'),
-],
+        'url' => env('SMS_GATEWAY_URL'),
+        'username' => env('SMS_GATEWAY_USERNAME'),
+        'hash' => env('SMS_GATEWAY_HASH_API'),
+        'sender' => env('SMS_GATEWAY_SENDER'),
+    ],
 
 ];

@@ -165,7 +165,7 @@ class UserAuthController extends Controller
                 'pan_number' => 'nullable|string|size:10|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
                 'address_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
                 'identity_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-                'profile_logo' => 'nullable|file|image|max:2048',
+                'profile_logo' => 'nullable|file|image|mimes:jpg,jpeg,png|max:2048',
                 'address_line' => 'nullable|string|max:255',
                 'state' => 'nullable|string|max:100',
                 'city' => 'nullable|string|max:100',
