@@ -47,6 +47,7 @@ Route::prefix('auth')->group(function () {
             Route::get('/dashboard', [AdminAuthController::class, 'dashboard']);
             Route::post('/admin-store', [AdminProfileController::class, 'adminstore']);
             Route::post('/store', [AdminProfileController::class, 'store']);
+            Route::post('/change-password', [AdminProfileController::class, 'changePassword']);
 
         });
     });

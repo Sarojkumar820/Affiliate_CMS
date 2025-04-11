@@ -152,6 +152,59 @@ class AdminProfileController extends Controller
         }
     }
 
+    public function changePassword(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $admin = Auth::guard('admin')->user();
+
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access. Please log in again.',
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'new_password' => [
+                'required',
+                'string',
+                'min:6',
+                'max:24',
+                'different:current_password',
+                function ($attribute, $value, $fail) {
+                    $complexity = 0;
+                    if (preg_match('/[A-Z]/', $value)) $complexity++;
+                    if (preg_match('/[a-z]/', $value)) $complexity++;
+                    if (preg_match('/[0-9]/', $value)) $complexity++;
+                    if (preg_match('/[^A-Za-z0-9]/', $value)) $complexity++;
+                    if ($complexity < 3) {
+                        $fail('Use 6-24 characters with 3 character types (A-Z, a-z, 0-9, or symbols).');
+                    }
+                }
+            ],
+            'new_password_confirmation' => ['required', 'string', 'same:new_password'],
+        ]);
+
+        if (!Hash::check($validated['current_password'], $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The current password is incorrect.'
+            ], 422);
+        }
+
+        // Update password
+        $admin->update([
+            'password' => Hash::make($validated['new_password']),
+            'password_changed_at' => now()->setTimezone('Asia/Kolkata'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password changed successfully.',
+        ], 200);
+    }
+
     protected function generateStrongPassword($length = 16)
     {
         $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
