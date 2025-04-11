@@ -44,8 +44,8 @@ class Admin extends Authenticatable implements JWTSubject
     /**
      * Automatically hash the password when setting it
      */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = Hash::make($value);
-    }
+    // public function setPasswordAttribute($value)
+    // {
+    //     $this->attributes['password'] = Hash::make($value);
+    // }
 }
