@@ -22,9 +22,9 @@ class AdminProfileController extends Controller
                 'email'        => 'required|email|unique:admins,email',
                 'phone'        => 'required|string|unique:admins,phone',
                 'role'         => 'required|in:1,2,3',
-                'gender'       => 'nullable|in:Male,Female,Other',
-                'designation'  => 'nullable|string|max:255',
-                'department'   => 'nullable|string|max:255',
+                'gender'       => 'required|in:Male,Female,Other',
+                'designation'  => 'required|string|max:255',
+                'department'   => 'required|string|max:255',
                 'employee_id'  => 'required|string|unique:admins,employee_id',
             ]);
 
@@ -97,8 +97,8 @@ class AdminProfileController extends Controller
                 'full_name' => 'required|string|max:255',
                 'phone' => 'required|unique:users,phone',
                 'user_type' => 'required|in:2,3',
-                'email' => 'nullable|email|unique:users,email',
-                'pan_number' => 'nullable|string|size:10|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
+                'email' => 'required|email|unique:users,email',
+                'pan_number' => 'required|string|size:10|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
             ]);
 
             $randomPassword = $this->generateStrongPassword(16);
