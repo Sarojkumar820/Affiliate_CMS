@@ -34,6 +34,7 @@ const SUPPORTED_FORMATS = [
   'image/png',
   'image/gif',
   'image/svg+xml',
+  'application/pdf',
 ];
 
 const fileValidation = Yup.mixed()
@@ -74,7 +75,8 @@ export default function SignUp1() {
     const formData = new FormData();
 
     formData.append('full_name', val.full_name);
-    formData.append('phone', val.phone);
+   // const phoneNumber = val.phone.replace(/\D/g, ''); // Remove non-numeric characters
+    formData.append('phone', (val.phone));
     formData.append('email', val.email);
     formData.append('gender', val.gender);
     formData.append('aadhaar_number', val.aadhaar_number);
@@ -91,13 +93,13 @@ export default function SignUp1() {
       formData.append('gst_number', val.gst_number);
     }
     if (val.profilePic) {
-      formData.append('profilePic', val.profilePic);
+      formData.append('profile_logo', val.profilePic);
     }
     if (val.panCard) {
-      formData.append('panCard', val.panCard);
+      formData.append('identity_proof', val.panCard);
     }
     if (val.aadhaarCard) {
-      formData.append('aadhaarCard', val.aadhaarCard);
+      formData.append('address_proof', val.aadhaarCard);
     }
     try {
       const responseData = await axios.post(
